@@ -1,6 +1,9 @@
 ﻿namespace FeatureFlagTests.Utilities.FeatureFlags
 {
-    public interface IFeatureToggle
+    /// <summary>The FeatureToggles interface.</summary>
+    public interface IFeatureToggles
     {
+        /// <summary>Gets or sets the beta.</summary>
+        string Beta { get; set; }
     }
 }

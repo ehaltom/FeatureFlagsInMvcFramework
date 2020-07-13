@@ -11,6 +11,11 @@
     /// <summary>The feature utilities.</summary>
     public static class FeatureUtilities
     {
+        /// <summary>
+        /// the logger
+        /// </summary>
+        private static ILogger log = Utilities.ApplicationLogging.CreateLogger("CoreJobSweeper");
+
         /// <summary>Gets or sets the flags.</summary>
         public static IEnumerable<FeatureFlag> Flags { get; set; } = new List<FeatureFlag>();
 
@@ -20,14 +25,22 @@
         /// <exception cref="FeatureToggleNotConfiguredException">a feature toggle not configured in azure exception. This will trigger if a particular feature flag is not present within the Azure App Configuration project for a particular environment</exception>
         public static bool IsEnabled(FeatureToggles feature)
         {
-            var featureName = feature.ToString();
-            var val = Flags.FirstOrDefault(x => x.Id == featureName);
-            if (val == null)
+            try
             {
-                throw new FeatureToggleNotConfiguredException(featureName);
-            }
+                var featureName = feature.ToString();
+                var val = Flags.FirstOrDefault(x => x.Id == featureName);
+                if (val == null)
+                {
+                    throw new FeatureToggleNotConfiguredException(featureName);
+                }
 
-            return val.Enabled;
+                return val.Enabled;
+            }
+            catch (FeatureToggleNotConfiguredException ex)
+            {
+                log.LogError(ex.Message, ex);
+                return false;
+            }
         }
 
         /// <summary>The is not enabled.</summary>

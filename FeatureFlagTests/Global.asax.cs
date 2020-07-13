@@ -20,19 +20,35 @@ using Unity.Lifetime;
 
 namespace FeatureFlagTests
 {
-    public class MvcApplication : System.Web.HttpApplication
+    using Microsoft.Extensions.Logging;
+
+    using NLog;
+
+    using Unity.NLog;
+
+    using ILogger = Microsoft.Extensions.Logging.ILogger;
+
+    /// <summary>The mvc application.</summary>
+    public class MvcApplication : HttpApplication
     {
+        /// <summary>The _configuration.</summary>
         private static IConfiguration _configuration = null;
+
+        /// <summary>The _refresher.</summary>
         private static IConfigurationRefresher _refresher = null;
 
+        /// <summary>The application_ start.</summary>
         public void Application_Start()
         {
             AreaRegistration.RegisterAllAreas();
             FilterConfig.RegisterGlobalFilters(GlobalFilters.Filters);
             RouteConfig.RegisterRoutes(RouteTable.Routes);
             BundleConfig.RegisterBundles(BundleTable.Bundles);
+            var container = new UnityContainer();
+            container.AddNewExtension<NLogExtension>();
         }
 
+        /// <summary>The application_ begin request.</summary>
         protected void Application_BeginRequest()
         {
             _configuration = new ConfigurationBuilder()
@@ -48,8 +64,8 @@ namespace FeatureFlagTests
 
                     _refresher = options.GetRefresher();
                 }).Build();
-
-            FeatureUtilities.PopulateFlags(_configuration.GetSection("FeatureManagement").GetChildren());
+            var results = _configuration.GetSection("FeatureManagement").GetChildren();
+            FeatureUtilities.PopulateFlags(results);
         }
     }
 }
