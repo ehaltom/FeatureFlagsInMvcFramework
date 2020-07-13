@@ -6,10 +6,11 @@ using System.Linq;
 using System.Web;
 using System.Web.Mvc;
 using FeatureFlagTests.Configuration;
+using FeatureFlagTests.Toggles;
 using FeatureFlagTests.Utilities;
+using FeatureFlagTests.Utilities.FeatureFlags;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Configuration.AzureAppConfiguration;
-using Microsoft.FeatureManagement.Mvc;
 
 namespace FeatureFlagTests.Controllers
 {
@@ -18,8 +19,7 @@ namespace FeatureFlagTests.Controllers
         public ActionResult Index()
         {
             string message = "Beta feature is off";
-
-            if (FeatureUtilities.FeatureOn(FeatureUtilities.Beta))
+            if (FeatureUtilities.IsEnabled(FeatureToggles.Beta))
             {
                 message = "Beta feature is on";
             }
@@ -29,7 +29,7 @@ namespace FeatureFlagTests.Controllers
             return View();
         }
 
-        [FeatureGate("Beta")]
+        [FeatureGate(FeatureToggles.Beta)]
         public ActionResult About()
         {
             ViewBag.Message = "Your application description page.";

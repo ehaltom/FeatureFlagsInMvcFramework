@@ -31,23 +31,24 @@ namespace FeatureFlagTests
             FilterConfig.RegisterGlobalFilters(GlobalFilters.Filters);
             RouteConfig.RegisterRoutes(RouteTable.Routes);
             BundleConfig.RegisterBundles(BundleTable.Bundles);
+        }
 
+        protected void Application_BeginRequest()
+        {
             _configuration = new ConfigurationBuilder()
                 .AddAzureAppConfiguration(options =>
                 {
                     options.Connect(Environment.GetEnvironmentVariable("AppConfigConnectionString"))
-                        .UseFeatureFlags().ConfigureRefresh(refresh =>
+                        .UseFeatureFlags()
+                        .ConfigureRefresh(refresh =>
                         {
-                            refresh.Register("TestApp:Settings:Message")
+                            refresh.Register("FeatureManagement")
                                 .SetCacheExpiration(TimeSpan.FromSeconds(10));
                         });
 
                     _refresher = options.GetRefresher();
                 }).Build();
-        }
 
-        protected void Application_BeginRequest()
-        {
             FeatureUtilities.PopulateFlags(_configuration.GetSection("FeatureManagement").GetChildren());
         }
     }
